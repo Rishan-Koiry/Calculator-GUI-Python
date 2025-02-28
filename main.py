@@ -4,20 +4,59 @@ from tkinter import messagebox
 
 
 class Calculator:
+    BUTTONS = [
+        "7",
+        "8",
+        "9",
+        "/",
+        "4",
+        "5",
+        "6",
+        "*",
+        "1",
+        "2",
+        "3",
+        "-",
+        ".",
+        "0",
+        "=",
+        "+",
+        "C",
+        "AC",
+        "COPY",
+        "%",
+    ]
+    BUTTON_PROPERTIES = {
+        "width": 5,
+        "height": 2,
+        "font": ("arial", 18, "bold"),
+        "bg": "white",
+        "fg": "black",
+        "relief": "raised",
+        "bd": 5,
+    }
+
     def __init__(self, root):
         self.root = root
         self.root.title("Calculator RK")
         self.root.geometry("400x600")
         self.root.resizable(False, False)
-        self.root.attributes("-fullscreen", False)
         self.expression = ""
 
         self.input_text = tk.StringVar()
-        self.input_frame = tk.Frame(self.root, bg="black")
-        self.input_frame.pack(expand=True, fill="both")
+        self.create_widgets()
 
-        self.input_field = tk.Entry(
-            self.input_frame,
+    def create_widgets(self):
+        self.create_input_frame()
+        self.create_buttons_frame()
+        self.create_buttons()
+
+    def create_input_frame(self):
+        input_frame = tk.Frame(self.root, bg="black")
+        input_frame.pack(expand=True, fill="both")
+
+        input_field = tk.Entry(
+            input_frame,
             textvariable=self.input_text,
             font=("arial", 35, "bold"),
             bd=10,
@@ -26,52 +65,21 @@ class Calculator:
             bg="gray",
             fg="white",
         )
-        self.input_field.pack(expand=True, fill="both", ipady=20, padx=10)
+        input_field.pack(expand=True, fill="both", ipady=20, padx=10)
 
+    def create_buttons_frame(self):
         self.buttons_frame = tk.Frame(self.root, bg="black")
         self.buttons_frame.pack(expand=True, fill="both")
 
-        self.create_buttons()
-
     def create_buttons(self):
-        buttons = [
-            "7",
-            "8",
-            "9",
-            "/",
-            "4",
-            "5",
-            "6",
-            "*",
-            "1",
-            "2",
-            "3",
-            "-",
-            ".",
-            "0",
-            "=",
-            "+",
-            "C",
-            "AC",
-            "COPY",
-            "%",
-        ]
-
-        row = 0
-        col = 0
-        for button in buttons:
+        row, col = 0, 0
+        for button in self.BUTTONS:
             action = lambda x=button: self.click_event(x)
             tk.Button(
                 self.buttons_frame,
                 text=button,
-                width=5,
-                height=2,
-                font=("arial", 18, "bold"),
                 command=action,
-                bg="white",
-                fg="black",
-                relief="raised",
-                bd=5,
+                **self.BUTTON_PROPERTIES,
             ).grid(row=row, column=col, sticky="nsew")
             col += 1
             if col > 3:
@@ -85,30 +93,40 @@ class Calculator:
 
     def click_event(self, key):
         if key == "=":
-            try:
-                result = str(eval(self.expression))
-                self.input_text.set(f"={result}")
-                self.expression = result
-            except:
-                self.input_text.set("Calculation Error")
-                self.expression = ""
+            self.calculate_result()
         elif key == "C":
-            self.expression = ""
-            self.input_text.set("")
+            self.clear_expression()
         elif key == "AC":
-            self.expression = self.expression[:-1]
-            self.input_text.set(self.expression)
+            self.delete_last_character()
         elif key == "COPY":
-            pyperclip.copy(self.input_text.get())
-            self.show_copy_animation()
-
+            self.copy_to_clipboard()
         else:
-            self.expression += str(key)
-            self.input_text.set(self.expression)
+            self.update_expression(key)
 
-    def show_copy_animation(self):
+    def calculate_result(self):
+        try:
+            result = str(eval(self.expression))
+            self.input_text.set(f"={result}")
+            self.expression = result
+        except:
+            self.input_text.set("Calculation Error")
+            self.expression = ""
+
+    def clear_expression(self):
+        self.expression = ""
+        self.input_text.set("")
+
+    def delete_last_character(self):
+        self.expression = self.expression[:-1]
+        self.input_text.set(self.expression)
+
+    def copy_to_clipboard(self):
+        pyperclip.copy(self.input_text.get())
         messagebox.showinfo("Copied", "Number copied to clipboard!")
-        # self.root.after(50, lambda: self.input_field.config(bg="gray"))
+
+    def update_expression(self, key):
+        self.expression += str(key)
+        self.input_text.set(self.expression)
 
 
 if __name__ == "__main__":
