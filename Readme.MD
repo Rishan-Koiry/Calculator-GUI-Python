@@ -4,3 +4,4 @@
 3)if you were in mac/os enter in your bash or command line "pip3 install pyperclip"
 4)must need to have install the python  -->
 <!-- stay Happy -->
+hi
